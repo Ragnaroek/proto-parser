@@ -1,5 +1,5 @@
 [package]
-name = "proto-parser"
+name = "protoparse"
 version = "0.0.1"
 authors = ["Michael Bohn <spaceodyssey@gmx.de>"]
 
