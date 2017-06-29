@@ -1,2 +1,2 @@
 # proto-parser
-a .proto file parser, writting in pure Rust
+A .proto file parser, written in pure Rust
