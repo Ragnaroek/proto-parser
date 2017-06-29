@@ -6,5 +6,11 @@ use super::scanner::Scanner;
 pub struct ProtoDef {}
 
 pub fn parse(path: &Path) -> ProtoDef {
+
+    let scanner = Scanner::new(path);
+    let tk = scanner.next_token();
+
+    println!("token: {:?}", tk);
+
     return ProtoDef{};
 }

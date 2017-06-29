@@ -3,7 +3,11 @@ use std::path::Path;
 use std::io::Read;
 use std::fs::File;
 
+#[derive(Debug)]
 pub enum Token {
+    Syntax,
+    Eq,
+    StrLit(String),
     EOF
 }
 
@@ -19,7 +23,7 @@ impl Scanner {
         return Scanner{buf: buffer};
     }
 
-    pub fn next_token() -> Token {
+    pub fn next_token(&self) -> Token {
         return Token::EOF;
     }
 }
