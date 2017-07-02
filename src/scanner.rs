@@ -1,7 +1,8 @@
 
 use std::str::Chars;
+use std::iter::Peekable;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Token {
     Syntax,
     Eq,
@@ -40,21 +41,56 @@ pub enum Token {
 }
 
 pub struct Scanner<'a> {
-    buf: Chars<'a>
+    buf: Peekable<Chars<'a>>
 }
 
 impl<'a> Scanner<'a> {
 
     pub fn new(buffer: &'a String) -> Scanner<'a> {
-        return Scanner{buf: buffer.chars()};
+        return Scanner{buf: buffer.chars().peekable()};
     }
 
     pub fn next_token(&mut self) -> Token {
-        println!("### {:?}", self.buf.next());
+        self.unread_whitespace();
 
-        //TODO: create sym-table str -> Token, populate with keywords
-        // find next word
+        //read token
+        let mut token = String::new();
+        loop {
+            let peek = self.buf.peek().map(|c| *c);
+            match peek {
+                None => return Token::EOF,
+                Some(c) => {
+                    if c.is_whitespace() { // TODO test for chars not allowed in ident
+                        break; //end of token
+                    } else {
+                        token.push(c);
+                        self.buf.next();
+                    }
+                }
+            }
+        }
+
+        println!("#### token {:?}", token);
+
+        //TODO: create sym-table str (static) -> Token, populate with keywords
+        // lookup Token for detected token-string
 
         return Token::EOF;
+    }
+
+    fn unread_whitespace(&mut self) {
+        loop {
+            let peek = self.buf.peek().map(|c| *c);
+            match peek {
+                None => return, //caller will detect EOF
+                Some(c) => {
+                    if !c.is_whitespace() {
+                        return;
+                    } else {
+                        self.buf.next();
+                    }
+                }
+            }
+        }
     }
 }
