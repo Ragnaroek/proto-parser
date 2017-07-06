@@ -17,7 +17,7 @@ fn should_return_eof_for_empty_input() {
 
 #[test]
 fn should_scan_syntax_stmt() {
-    let input = "syntax = \"proto3\";" .to_string();
+    let input = "syntax = \"proto3\";".to_string();
     let mut scanner = Scanner::new(&input);
     assert_eq!(scanner.next_token(), Token::Syntax);
     assert_eq!(scanner.next_token(), Token::Eq);
@@ -25,5 +25,23 @@ fn should_scan_syntax_stmt() {
     assert_eq!(scanner.next_token(), Token::Semicolon);
     assert_eq!(scanner.next_token(), Token::EOF);
 }
+
+// str literal test
+#[test]
+fn should_parse_str_literal() {
+    let input = "\"a string{})();,.\"".to_string();
+    let mut scanner = Scanner::new(&input);
+    assert_eq!(scanner.next_token(), Token::StrLit("a string{})();,.".to_string()));
+}
+
+#[test]
+fn should_parse_str_literal_with_escaping() {
+    let input = "\"string{with};.\\\"es(c)aping\\\".\"".to_string();
+    let mut scanner = Scanner::new(&input);
+    assert_eq!(scanner.next_token(), Token::StrLit("string{with};.\"es(c)aping\".".to_string()));
+}
+
+// TODO Test non-closed str literal (should return scan_error)
+
 
 // helper methods

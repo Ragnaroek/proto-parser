@@ -99,18 +99,35 @@ impl<'a> Scanner<'a> {
 
         let mut token = String::new();
         let mut str_lit = false;
+        let mut escaped = false;
         loop {
             let peek = self.buf.peek().map(|c| *c);
             match peek {
                 None => return Token::EOF,
                 Some(c) => {
                     if str_lit {
-                        if c == '"' { //TODO Handle escaping
-                            self.buf.next();
-                            break;
-                        } else {
-                            token.push(c);
-                            self.buf.next();
+                        match c {
+                            // TODO there are more escaping chars in proto
+                            '"'  => {
+                                if escaped {
+                                    self.buf.next(); token.push(c); escaped = false;
+                                } else {
+                                    self.buf.next(); break;
+                                }
+                            }
+                            '\\' => {
+                                if escaped {
+                                    self.buf.next(); token.push(c); escaped = false;
+                                } else {
+                                    escaped = true; self.buf.next();
+                                }
+                            }
+                            _ => {
+                                if escaped {
+                                    //TODO Return error (extend return type)
+                                }
+                                token.push(c); self.buf.next();
+                            }
                         }
                     } else {
                         match c {
