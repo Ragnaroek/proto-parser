@@ -7,3 +7,4 @@ authors = ["Michael Bohn <spaceodyssey@gmx.de>"]
 name = "protoparse"
 
 [dependencies]
+lazy_static = "0.2.8"
