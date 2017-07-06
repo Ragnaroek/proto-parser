@@ -21,6 +21,7 @@ pub enum Token {
     Returns,
     Semicolon,
     Dot,
+    Comma,
     Message,
     //types
     TDouble,
@@ -77,6 +78,16 @@ pub struct Scanner<'a> {
     buf: Peekable<Chars<'a>>
 }
 
+fn non_ident_char(c: char) -> bool {
+    return c == '{' ||
+           c == '=' ||
+           c == '}' ||
+           c == '(' ||
+           c == ',' ||
+           c == ';' ||
+           c == '.';
+}
+
 impl<'a> Scanner<'a> {
 
     pub fn new(buffer: &'a String) -> Scanner<'a> {
@@ -86,21 +97,45 @@ impl<'a> Scanner<'a> {
     pub fn next_token(&mut self) -> Token {
         self.unread_whitespace();
 
-        //read token
         let mut token = String::new();
+        let mut str_lit = false;
         loop {
             let peek = self.buf.peek().map(|c| *c);
             match peek {
                 None => return Token::EOF,
                 Some(c) => {
-                    if c.is_whitespace() { // TODO test for chars not allowed in ident start: =, {, }, (, ), ;, .
-                        break; //end of token
+                    if str_lit {
+                        if c == '"' { //TODO Handle escaping
+                            self.buf.next();
+                            break;
+                        } else {
+                            token.push(c);
+                            self.buf.next();
+                        }
                     } else {
-                        token.push(c);
-                        self.buf.next();
+                        match c {
+                            '{' => {self.buf.next(); return Token::LCurly},
+                            '}' => {self.buf.next(); return Token::RCurly},
+                            '=' => {self.buf.next(); return Token::Eq},
+                            '(' => {self.buf.next(); return Token::LParen},
+                            ')' => {self.buf.next(); return Token::RParen},
+                            ',' => {self.buf.next(); return Token::Comma},
+                            ';' => {self.buf.next(); return Token::Semicolon},
+                            '.' => {self.buf.next(); return Token::Dot},
+                            '"' => {str_lit = true; self.buf.next(); continue},
+                            ch if ch.is_whitespace() || non_ident_char(ch) => break,
+                            _ => {
+                                token.push(c);
+                                self.buf.next();
+                            }
+                        }
                     }
                 }
             }
+        }
+
+        if str_lit {
+            return Token::StrLit(token);
         }
 
         let lookup_token = IDENT_MAP.get(&token[..]);
