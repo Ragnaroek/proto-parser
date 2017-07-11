@@ -104,19 +104,103 @@ fn should_scan_enum() {
     assert_eq!(scanner.next_token(), Ok(Token::EOF));
 }
 
-// TODO add message + service definition examples as test
+#[test]
+fn should_scan_message() {
+    let input = "message Outer { option (my_option).a = true;
+      message Inner {   // Level 2
+        int64 ival = 1;
+      }
+      map<int32, string> my_map = 2;
+    }".to_string();
+    let mut scanner = Scanner::new(&input);
+
+    assert_eq!(scanner.next_token(), Ok(Token::Message));
+    assert_eq!(scanner.next_token(), Ok(Token::Ident("Outer".to_string())));
+    assert_eq!(scanner.next_token(), Ok(Token::LCurly));
+    assert_eq!(scanner.next_token(), Ok(Token::Option));
+    assert_eq!(scanner.next_token(), Ok(Token::LParen));
+    assert_eq!(scanner.next_token(), Ok(Token::Ident("my_option".to_string())));
+    assert_eq!(scanner.next_token(), Ok(Token::RParen));
+    assert_eq!(scanner.next_token(), Ok(Token::Dot));
+    assert_eq!(scanner.next_token(), Ok(Token::Ident("a".to_string())));
+    assert_eq!(scanner.next_token(), Ok(Token::Eq));
+    assert_eq!(scanner.next_token(), Ok(Token::BoolLit(true)));
+    assert_eq!(scanner.next_token(), Ok(Token::Semicolon));
+
+    assert_eq!(scanner.next_token(), Ok(Token::Message));
+    assert_eq!(scanner.next_token(), Ok(Token::Ident("Inner".to_string())));
+    assert_eq!(scanner.next_token(), Ok(Token::LCurly));
+    assert_eq!(scanner.next_token(), Ok(Token::TInt64));
+    assert_eq!(scanner.next_token(), Ok(Token::Ident("ival".to_string())));
+    assert_eq!(scanner.next_token(), Ok(Token::Eq));
+    assert_eq!(scanner.next_token(), Ok(Token::DecimalLit(1)));
+    assert_eq!(scanner.next_token(), Ok(Token::Semicolon));
+    assert_eq!(scanner.next_token(), Ok(Token::RCurly));
+
+    assert_eq!(scanner.next_token(), Ok(Token::Map));
+    assert_eq!(scanner.next_token(), Ok(Token::Lt));
+    assert_eq!(scanner.next_token(), Ok(Token::TInt32));
+    assert_eq!(scanner.next_token(), Ok(Token::Comma));
+    assert_eq!(scanner.next_token(), Ok(Token::TString));
+    assert_eq!(scanner.next_token(), Ok(Token::Gt));
+    assert_eq!(scanner.next_token(), Ok(Token::Ident("my_map".to_string())));
+    assert_eq!(scanner.next_token(), Ok(Token::Eq));
+    assert_eq!(scanner.next_token(), Ok(Token::DecimalLit(2)));
+    assert_eq!(scanner.next_token(), Ok(Token::Semicolon));
+    assert_eq!(scanner.next_token(), Ok(Token::RCurly));
+    assert_eq!(scanner.next_token(), Ok(Token::EOF));
+}
+
+#[test]
+fn should_scan_service_def() {
+    let input = "service SearchService {
+      rpc Search (SearchRequest) returns (SearchResponse);
+    }".to_string();
+    let mut scanner = Scanner::new(&input);
+
+    assert_eq!(scanner.next_token(), Ok(Token::Service));
+    assert_eq!(scanner.next_token(), Ok(Token::Ident("SearchService".to_string())));
+    assert_eq!(scanner.next_token(), Ok(Token::LCurly));
+    assert_eq!(scanner.next_token(), Ok(Token::Rpc));
+    assert_eq!(scanner.next_token(), Ok(Token::Ident("Search".to_string())));
+    assert_eq!(scanner.next_token(), Ok(Token::LParen));
+    assert_eq!(scanner.next_token(), Ok(Token::Ident("SearchRequest".to_string())));
+    assert_eq!(scanner.next_token(), Ok(Token::RParen));
+    assert_eq!(scanner.next_token(), Ok(Token::Returns));
+    assert_eq!(scanner.next_token(), Ok(Token::LParen));
+    assert_eq!(scanner.next_token(), Ok(Token::Ident("SearchResponse".to_string())));
+    assert_eq!(scanner.next_token(), Ok(Token::RParen));
+    assert_eq!(scanner.next_token(), Ok(Token::Semicolon));
+    assert_eq!(scanner.next_token(), Ok(Token::RCurly));
+    assert_eq!(scanner.next_token(), Ok(Token::EOF));
+}
+
+#[test]
+fn should_can_line_comment() {
+    let input = "//message int64\n;".to_string();
+    let mut scanner = Scanner::new(&input);
+    assert_eq!(scanner.next_token(), Ok(Token::Semicolon));
+    assert_eq!(scanner.next_token(), Ok(Token::EOF));
+
+    //not really correct, but since there is no single / in proto, assume
+    //it is a line comment
+    let input2 = "/a comment\n;".to_string();
+    let mut scanner2 = Scanner::new(&input2);
+    assert_eq!(scanner2.next_token(), Ok(Token::Semicolon));
+    assert_eq!(scanner2.next_token(), Ok(Token::EOF));
+}
 
 // str literal tests
 
 #[test]
-fn should_parse_str_literal() {
+fn should_scan_str_literal() {
     let input = "\"a string{})();,.\"".to_string();
     let mut scanner = Scanner::new(&input);
     assert_eq!(scanner.next_token(), Ok(Token::StrLit("a string{})();,.".to_string())));
 }
 
 #[test]
-fn should_parse_str_literal_with_escaping() {
+fn should_scan_str_literal_with_escaping() {
     let input = "\"string{with};.\\\"es(c)aping\\\".\"".to_string();
     let mut scanner = Scanner::new(&input);
     assert_eq!(scanner.next_token(), Ok(Token::StrLit("string{with};.\"es(c)aping\".".to_string())));

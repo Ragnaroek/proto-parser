@@ -32,6 +32,9 @@ pub enum Token {
     DecimalLit(u32),
     LBracket,
     RBracket,
+    Lt,
+    Gt,
+    Map,
     //types
     TDouble,
     TFloat,
@@ -68,6 +71,7 @@ lazy_static! {
         map.insert("enum".into(), Token::Enum);
         map.insert("true".into(), Token::BoolLit(true));
         map.insert("false".into(), Token::BoolLit(false));
+        map.insert("map".into(), Token::Map);
 
         map.insert("double".into(), Token::TDouble);
         map.insert("float".into(), Token::TFloat);
@@ -103,6 +107,8 @@ fn non_ident_char(c: char) -> bool {
            c == '=' ||
            c == ',' ||
            c == ';' ||
+           c == '<' ||
+           c == '>' ||
            c == '.';
 }
 
@@ -156,6 +162,7 @@ impl<'a> Scanner<'a> {
                     } else {
                         if token.len() == 0 {
                             match c {
+                                '/' => {self.unread_line_comment(); continue},
                                 '{' => {self.buf.next(); return Ok(Token::LCurly)},
                                 '}' => {self.buf.next(); return Ok(Token::RCurly)},
                                 '=' => {self.buf.next(); return Ok(Token::Eq)},
@@ -166,6 +173,8 @@ impl<'a> Scanner<'a> {
                                 '.' => {self.buf.next(); return Ok(Token::Dot)},
                                 '[' => {self.buf.next(); return Ok(Token::LBracket)},
                                 ']' => {self.buf.next(); return Ok(Token::RBracket)},
+                                '<' => {self.buf.next(); return Ok(Token::Lt)},
+                                '>' => {self.buf.next(); return Ok(Token::Gt)},
                                 '"' => {str_lit = true; self.buf.next(); continue},
                                 ch if ch.is_digit(10) => {dec_lit = true; token.push(c); self.buf.next();},
                                 _ => {
@@ -203,6 +212,22 @@ impl<'a> Scanner<'a> {
             return Ok(lookup_token.unwrap().clone());
         }
         return Ok(Token::Ident(token))
+    }
+
+    fn unread_line_comment(&mut self) {
+        loop {
+            let peek = self.buf.peek().map(|c| *c);
+            match peek {
+                None => return,
+                Some(c) => {
+                    self.buf.next();
+                    if c == '\n' {
+                        self.unread_whitespace();
+                        return;
+                    }
+                }
+            }
+        }
     }
 
     fn unread_whitespace(&mut self) {
