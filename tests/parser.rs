@@ -41,6 +41,12 @@ fn should_parse_public_import() {
     assert_eq!(result.imports[0].name, "header.proto".to_string());
 }
 
+#[test]
+fn should_parse_empty_stmts() {
+    let input = min_file() + ";;;;";
+    parse(&input).unwrap();
+}
+
 // helper methods
 
 fn min_file() -> String {

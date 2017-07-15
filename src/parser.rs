@@ -10,11 +10,12 @@ pub fn parse(buffer: &String) -> Result<ProtoDef, &str> {
     let mut lookahead = scanner.next_token()?;
     while lookahead != Token::EOF {
         match lookahead {
-            // TODO parse also package, option, message, enum, service and emptyStmt
+            // TODO parse also package, option, message, enum, service
             Token::Import => {
                 let imp = parse_import(&mut scanner)?;
                 def.add_import(imp);
             },
+            Token::Semicolon => {} //simply ignore that
             _ => return Err("unexpected token")
         }
 
