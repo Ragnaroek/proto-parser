@@ -1,5 +1,5 @@
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Syntax {
     V3
 }
@@ -10,8 +10,17 @@ pub struct ProtoDef {
     pub imports: Vec<Import>
 }
 
+#[derive(Debug, PartialEq)]
+pub enum ImportType {
+    Default,
+    Weak,
+    Public
+}
+
 #[derive(Debug)]
 pub struct Import {
+    pub import_type: ImportType,
+    pub name: String
 }
 
 impl ProtoDef {

@@ -1,8 +1,5 @@
 use super::scanner::{Scanner, Token};
-use super::ast::{ProtoDef, Syntax, Import};
-
-
-//TODO Impl recursive descend parser here :)
+use super::ast::{ProtoDef, Syntax, Import, ImportType};
 
 pub fn parse(buffer: &String) -> Result<ProtoDef, &str> {
     let mut scanner = Scanner::new(buffer);
@@ -35,8 +32,24 @@ fn parse_syntax(scanner: &mut Scanner) -> Result<Syntax, &'static str> {
 }
 
 fn parse_import(scanner: &mut Scanner) -> Result<Import, &'static str> {
-    //TODO impl import parsing!
-    return Ok(Import{});
+
+    let mut next = scanner.next_token()?;
+    let mut import_type = ImportType::Default;
+
+    if next == Token::Weak {
+        import_type = ImportType::Weak;
+        next = scanner.next_token()?;
+    } else if next == Token::Public {
+        import_type = ImportType::Public;
+        next = scanner.next_token()?;
+    }
+
+    let name = match next {
+        Token::StrLit(s) => s,
+        _ => return Err("string literal expected in import")
+    };
+
+    return Ok(Import{import_type, name});
 }
 
 fn expect(mut scanner: &mut Scanner, expected: Token) -> Result<Token, &'static str> {
