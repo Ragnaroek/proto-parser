@@ -1,6 +1,6 @@
 extern crate protoparse;
 
-use protoparse::ast::{ProtoDef, Syntax, Import, ImportType};
+use protoparse::ast::{ProtoDef, Syntax, Import, ImportType, Package};
 
 #[test]
 fn should_add_import() {
@@ -14,4 +14,12 @@ fn should_add_import() {
     assert_eq!(def.imports.len(), 2);
     assert_eq!(def.imports[0].name, "test".to_string());
     assert_eq!(def.imports[1].name, "test2".to_string());
+}
+
+#[test]
+fn should_add_package() {
+    let mut def = ProtoDef::new(Syntax::V3);
+    assert_eq!(def.packages.len(), 0);
+    def.add_package(Package{});
+    assert_eq!(def.packages.len(), 1);
 }

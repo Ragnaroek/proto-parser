@@ -1,5 +1,5 @@
 use super::scanner::{Scanner, Token};
-use super::ast::{ProtoDef, Syntax, Import, ImportType};
+use super::ast::{ProtoDef, Syntax, Import, ImportType, Package};
 
 pub fn parse(buffer: &String) -> Result<ProtoDef, &str> {
     let mut scanner = Scanner::new(buffer);
@@ -14,6 +14,10 @@ pub fn parse(buffer: &String) -> Result<ProtoDef, &str> {
             Token::Import => {
                 let imp = parse_import(&mut scanner)?;
                 def.add_import(imp);
+            },
+            Token::Package => {
+                let pckg = parse_package(&mut scanner)?;
+                def.add_package(pckg);
             },
             Token::Semicolon => {} //simply ignore that
             _ => return Err("unexpected token")
@@ -33,7 +37,6 @@ fn parse_syntax(scanner: &mut Scanner) -> Result<Syntax, &'static str> {
 }
 
 fn parse_import(scanner: &mut Scanner) -> Result<Import, &'static str> {
-
     let mut next = scanner.next_token()?;
     let mut import_type = ImportType::Default;
 
@@ -51,6 +54,10 @@ fn parse_import(scanner: &mut Scanner) -> Result<Import, &'static str> {
     };
 
     return Ok(Import{import_type, name});
+}
+
+fn parse_package(scanner: &mut Scanner) -> Result<Package, &'static str> {
+    return Ok(Package{});
 }
 
 fn expect(mut scanner: &mut Scanner, expected: Token) -> Result<Token, &'static str> {

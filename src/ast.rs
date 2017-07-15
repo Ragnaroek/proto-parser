@@ -7,7 +7,8 @@ pub enum Syntax {
 #[derive(Debug)]
 pub struct ProtoDef {
     pub syntax: Syntax,
-    pub imports: Vec<Import>
+    pub imports: Vec<Import>,
+    pub packages: Vec<Package>
 }
 
 #[derive(Debug, PartialEq)]
@@ -23,12 +24,21 @@ pub struct Import {
     pub name: String
 }
 
+#[derive(Debug)]
+pub struct Package {
+    //TODO FullIdent
+}
+
 impl ProtoDef {
     pub fn new(syn: Syntax) -> ProtoDef {
-        return ProtoDef{syntax: syn, imports: Vec::new()};
+        return ProtoDef{syntax: syn, imports: Vec::new(), packages: Vec::new()};
     }
 
     pub fn add_import(&mut self, imp: Import) {
         self.imports.push(imp);
+    }
+
+    pub fn add_package(&mut self, pckg: Package) {
+        self.packages.push(pckg);
     }
 }
