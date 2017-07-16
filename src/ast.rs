@@ -25,9 +25,16 @@ pub struct Import {
 }
 
 #[derive(Debug)]
-pub struct Package {
-    //TODO FullIdent
+pub struct FullIdent {
+    pub idents: Vec<String>
 }
+
+#[derive(Debug)]
+pub struct Package {
+    pub full_ident: FullIdent
+}
+
+
 
 impl ProtoDef {
     pub fn new(syn: Syntax) -> ProtoDef {

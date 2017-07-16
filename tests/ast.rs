@@ -1,6 +1,6 @@
 extern crate protoparse;
 
-use protoparse::ast::{ProtoDef, Syntax, Import, ImportType, Package};
+use protoparse::ast::{ProtoDef, Syntax, Import, ImportType, Package, FullIdent};
 
 #[test]
 fn should_add_import() {
@@ -20,6 +20,8 @@ fn should_add_import() {
 fn should_add_package() {
     let mut def = ProtoDef::new(Syntax::V3);
     assert_eq!(def.packages.len(), 0);
-    def.add_package(Package{});
+    def.add_package(Package{full_ident: FullIdent{idents:vec!["foo".to_string()]}});
     assert_eq!(def.packages.len(), 1);
+    def.add_package(Package{full_ident: FullIdent{idents:vec!["foo".to_string(), "bar".to_string()]}});
+    assert_eq!(def.packages.len(), 2);
 }

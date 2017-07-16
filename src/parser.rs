@@ -1,5 +1,5 @@
 use super::scanner::{Scanner, Token};
-use super::ast::{ProtoDef, Syntax, Import, ImportType, Package};
+use super::ast::{ProtoDef, Syntax, Import, ImportType, Package, FullIdent};
 
 pub fn parse(buffer: &String) -> Result<ProtoDef, &str> {
     let mut scanner = Scanner::new(buffer);
@@ -38,8 +38,8 @@ fn parse_syntax(scanner: &mut Scanner) -> Result<Syntax, &'static str> {
 
 fn parse_import(scanner: &mut Scanner) -> Result<Import, &'static str> {
     let mut next = scanner.next_token()?;
-    let mut import_type = ImportType::Default;
 
+    let mut import_type = ImportType::Default;
     if next == Token::Weak {
         import_type = ImportType::Weak;
         next = scanner.next_token()?;
@@ -53,11 +53,46 @@ fn parse_import(scanner: &mut Scanner) -> Result<Import, &'static str> {
         _ => return Err("string literal expected in import")
     };
 
+    expect(scanner, Token::Semicolon)?;
+
     return Ok(Import{import_type, name});
 }
 
 fn parse_package(scanner: &mut Scanner) -> Result<Package, &'static str> {
-    return Ok(Package{});
+
+    let full_ident = parse_full_ident(scanner, Token::Semicolon)?;
+    return Ok(Package{full_ident: full_ident});
+}
+
+//term_token is consumed
+fn parse_full_ident(scanner: &mut Scanner, term_token: Token) -> Result<FullIdent, &'static str> {
+
+    let mut idents = Vec::new();
+
+    let first_ident = scanner.next_token()?;
+    match first_ident {
+        Token::Ident(s) => idents.push(s),
+        _ => return Err("package: identifier expected")
+    }
+
+    let mut next = scanner.next_token()?;
+    loop {
+        if next == term_token {
+            break;
+        }
+
+        if next != Token::Dot {
+            return Err("package: . expected");
+        }
+        next = scanner.next_token()?;
+        match next {
+            Token::Ident(s) => idents.push(s),
+            _ => return Err("package: identifier expected")
+        }
+        next = scanner.next_token()?;
+    }
+
+    return Ok(FullIdent{idents: idents});
 }
 
 fn expect(mut scanner: &mut Scanner, expected: Token) -> Result<Token, &'static str> {
