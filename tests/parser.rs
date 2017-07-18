@@ -1,7 +1,7 @@
 extern crate protoparse;
 
 use protoparse::parser::{parse};
-use protoparse::ast::{Syntax, ImportType};
+use protoparse::ast::*;
 
 #[test]
 fn should_parse_syntax() {
@@ -74,6 +74,79 @@ fn parse_not_package_without_name() {
     let input = min_file() + "package;";
     assert!(parse(&input).is_err());
 }
+
+#[test]
+fn parse_option_with_simple_ident_and_number_value() {
+    let input = min_file() + "option my_option = 42;";
+    let result = parse(&input).unwrap();
+
+    assert_eq!(result.options.len(), 1);
+    assert_eq!(result.options[0].full_ident.idents.len(), 1);
+    assert_eq!(result.options[0].full_ident.idents[0], "my_option".to_string());
+    assert_eq!(result.options[0].constant, ConstantValue::NumberValue(42.0));
+}
+
+#[test]
+fn parse_option_string_value() {
+    let input = min_file() + "option my_option = \"strOpt\";";
+    let result = parse(&input).unwrap();
+
+    assert_eq!(result.options.len(), 1);
+    assert_eq!(result.options[0].constant, ConstantValue::StringValue("strOpt".to_string()));
+}
+
+#[test]
+fn parse_option_bool_value() {
+    let input = min_file() + "option my_option = true;";
+    let result = parse(&input).unwrap();
+
+    assert_eq!(result.options.len(), 1);
+    assert_eq!(result.options[0].constant, ConstantValue::BoolValue(true));
+}
+
+#[test]
+fn parse_option_full_ident_value() {
+    let input = min_file() + "option my_option = my.ident.value;";
+    let result = parse(&input).unwrap();
+
+    assert_eq!(result.options.len(), 1);
+    assert_eq!(result.options[0].constant, ConstantValue::IdentValue(FullIdent::new(vec!["my".to_string(), "ident".to_string(), "value".to_string()])));
+}
+
+#[test]
+fn parse_option_with_full_ident_name() {
+    //not really allowed in the grammar, () are missing
+    let input = min_file() + "option my_option.full.ident.name = 42;";
+    let result = parse(&input).unwrap();
+
+    assert_eq!(result.options.len(), 1);
+    assert_eq!(result.options[0].full_ident.idents.len(), 4);
+    assert_eq!(result.options[0].full_ident.idents[0], "my_option".to_string());
+    assert_eq!(result.options[0].full_ident.idents[1], "full".to_string());
+    assert_eq!(result.options[0].full_ident.idents[2], "ident".to_string());
+    assert_eq!(result.options[0].full_ident.idents[3], "name".to_string());
+
+    assert_eq!(result.options[0].constant, ConstantValue::NumberValue(42.0));
+}
+
+#[test]
+fn parse_option_with_full_ident_name_in_paren() {
+    //not really allowed in the grammar, () are missing
+    let input = min_file() + "option (my_option.full.ident.name ) = 42;";
+    let result = parse(&input).unwrap();
+
+    assert_eq!(result.options.len(), 1);
+    assert_eq!(result.options[0].full_ident.idents.len(), 4);
+    assert_eq!(result.options[0].full_ident.idents[0], "my_option".to_string());
+    assert_eq!(result.options[0].full_ident.idents[1], "full".to_string());
+    assert_eq!(result.options[0].full_ident.idents[2], "ident".to_string());
+    assert_eq!(result.options[0].full_ident.idents[3], "name".to_string());
+
+    assert_eq!(result.options[0].constant, ConstantValue::NumberValue(42.0));
+}
+
+// TODO with (ident)
+// TODO with + DecimalLit
 
 // helper methods
 

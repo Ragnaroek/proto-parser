@@ -4,13 +4,6 @@ pub enum Syntax {
     V3
 }
 
-#[derive(Debug)]
-pub struct ProtoDef {
-    pub syntax: Syntax,
-    pub imports: Vec<Import>,
-    pub packages: Vec<Package>
-}
-
 #[derive(Debug, PartialEq)]
 pub enum ImportType {
     Default,
@@ -24,9 +17,19 @@ pub struct Import {
     pub name: String
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct FullIdent {
     pub idents: Vec<String>
+}
+
+impl FullIdent {
+    pub fn new(v: Vec<String>) -> FullIdent {
+        return FullIdent{idents: v};
+    }
+
+    pub fn insert(&mut self, ix: usize, n: String) {
+        self.idents.insert(ix, n);
+    }
 }
 
 #[derive(Debug)]
@@ -34,11 +37,36 @@ pub struct Package {
     pub full_ident: FullIdent
 }
 
+#[derive(Debug)]
+pub struct ProtoOption {
+    pub full_ident: FullIdent,
+    pub constant: ConstantValue
+}
 
+#[derive(Debug, PartialEq)]
+pub enum ConstantValue {
+    IdentValue(FullIdent),
+    NumberValue(f32),
+    StringValue(String),
+    BoolValue(bool)
+}
+
+#[derive(Debug)]
+pub struct ProtoDef {
+    pub syntax: Syntax,
+    pub imports: Vec<Import>,
+    pub packages: Vec<Package>,
+    pub options: Vec<ProtoOption>
+}
 
 impl ProtoDef {
     pub fn new(syn: Syntax) -> ProtoDef {
-        return ProtoDef{syntax: syn, imports: Vec::new(), packages: Vec::new()};
+        return ProtoDef{
+            syntax: syn,
+            imports: Vec::new(),
+            packages: Vec::new(),
+            options: Vec::new()
+        };
     }
 
     pub fn add_import(&mut self, imp: Import) {
@@ -47,5 +75,9 @@ impl ProtoDef {
 
     pub fn add_package(&mut self, pckg: Package) {
         self.packages.push(pckg);
+    }
+
+    pub fn add_option(&mut self, opt: ProtoOption) {
+        self.options.push(opt);
     }
 }
