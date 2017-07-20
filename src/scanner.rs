@@ -51,7 +51,9 @@ pub enum Token {
     TBool,
     TString,
     TBytes,
-    EOF
+    EOF,
+    Plus,
+    Minus
 }
 
 //use rust_phf once feature(plugin) can be used in the non-nightly
@@ -109,7 +111,9 @@ fn non_ident_char(c: char) -> bool {
            c == ';' ||
            c == '<' ||
            c == '>' ||
-           c == '.';
+           c == '.' ||
+           c == '+' ||
+           c == '-';
 }
 
 impl<'a> Scanner<'a> {
@@ -175,6 +179,8 @@ impl<'a> Scanner<'a> {
                                 ']' => {self.buf.next(); return Ok(Token::RBracket)},
                                 '<' => {self.buf.next(); return Ok(Token::Lt)},
                                 '>' => {self.buf.next(); return Ok(Token::Gt)},
+                                '+' => {self.buf.next(); return Ok(Token::Plus)},
+                                '-' => {self.buf.next(); return Ok(Token::Minus)},
                                 '"' => {str_lit = true; self.buf.next(); continue},
                                 ch if ch.is_digit(10) => {dec_lit = true; token.push(c); self.buf.next();},
                                 _ => {

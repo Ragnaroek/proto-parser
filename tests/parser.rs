@@ -145,8 +145,23 @@ fn parse_option_with_full_ident_name_in_paren() {
     assert_eq!(result.options[0].constant, ConstantValue::NumberValue(42.0));
 }
 
-// TODO with (ident)
-// TODO with + DecimalLit
+#[test]
+fn parse_option_with_plus_prefixed_number() {
+    let input = min_file() + "option foo = +42;";
+    let result = parse(&input).unwrap();
+
+    assert_eq!(result.options.len(), 1);
+    assert_eq!(result.options[0].constant, ConstantValue::NumberValue(42.0));
+}
+
+#[test]
+fn parse_option_with_minus_prefixed_number() {
+    let input = min_file() + "option foo = -42;";
+    let result = parse(&input).unwrap();
+
+    assert_eq!(result.options.len(), 1);
+    assert_eq!(result.options[0].constant, ConstantValue::NumberValue(-42.0));
+}
 
 // helper methods
 

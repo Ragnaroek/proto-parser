@@ -154,6 +154,20 @@ fn parse_constant(mut scanner: &mut Scanner) -> Result<ConstantValue, &'static s
             }
             return Err("unexepcted token in constant identifier")
         },
+        Token::Plus => {
+            let num = scanner.next_token()?;
+            match num {
+                Token::DecimalLit(d) => return Ok(ConstantValue::NumberValue(d as f32)),
+                _ => Err("unexpected token after +")
+            }
+        },
+        Token::Minus => {
+            let num = scanner.next_token()?;
+            match num {
+                Token::DecimalLit(d) => return Ok(ConstantValue::NumberValue(-(d as f32))),
+                _ => Err("unexpected token after -")
+            }
+        },
         _ => Err("unexpected token in constant expression")
     }
 

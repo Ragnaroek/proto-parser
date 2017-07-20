@@ -219,3 +219,12 @@ fn should_return_err_on_non_closed_str_literal() {
     let mut scanner = Scanner::new(&input);
     assert_eq!(scanner.next_token(), Err("Lexical error: unclosed string literal"));
 }
+
+#[test]
+fn should_scan_plus_minus_symbols() {
+    let input = "+-".to_string();
+    let mut scanner = Scanner::new(&input);
+    assert_eq!(scanner.next_token(), Ok(Token::Plus));
+    assert_eq!(scanner.next_token(), Ok(Token::Minus));
+    assert_eq!(scanner.next_token(), Ok(Token::EOF));
+}
