@@ -52,11 +52,25 @@ pub enum ConstantValue {
 }
 
 #[derive(Debug)]
+pub struct Service {
+    pub name: String,
+    pub rpcs: Vec<Rpc>
+}
+
+#[derive(Debug)]
+pub struct Rpc {
+    pub name: String,
+    pub request_type: FullIdent,
+    pub response_type: FullIdent
+}
+
+#[derive(Debug)]
 pub struct ProtoDef {
     pub syntax: Syntax,
     pub imports: Vec<Import>,
     pub packages: Vec<Package>,
-    pub options: Vec<ProtoOption>
+    pub options: Vec<ProtoOption>,
+    pub services: Vec<Service>,
 }
 
 impl ProtoDef {
@@ -65,7 +79,8 @@ impl ProtoDef {
             syntax: syn,
             imports: Vec::new(),
             packages: Vec::new(),
-            options: Vec::new()
+            options: Vec::new(),
+            services: Vec::new(),
         };
     }
 
@@ -79,5 +94,9 @@ impl ProtoDef {
 
     pub fn add_option(&mut self, opt: ProtoOption) {
         self.options.push(opt);
+    }
+
+    pub fn add_service(&mut self, service: Service) {
+        self.services.push(service);
     }
 }

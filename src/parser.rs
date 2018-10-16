@@ -10,7 +10,7 @@ pub fn parse(buffer: &String) -> Result<ProtoDef, &str> {
     let mut lookahead = scanner.next_token()?;
     while lookahead != Token::EOF {
         match lookahead {
-            // TODO parse also option, message, enum, service
+            //TODO parse also service, message, enum
             Token::Import => {
                 let imp = parse_import(&mut scanner)?;
                 def.add_import(imp);
@@ -23,8 +23,15 @@ pub fn parse(buffer: &String) -> Result<ProtoDef, &str> {
                 let opt = parse_option(&mut scanner)?;
                 def.add_option(opt);
             },
+            Token::Service => {
+                let service = parse_service(&mut scanner)?;
+                def.add_service(service);
+            },
             Token::Semicolon => {} //simply ignore that
-            _ => return Err("unexpected token")
+            token => {
+                println!("unexpected token: {:?}", token);
+                return Err("unexpected token");
+            }
         }
 
         lookahead = scanner.next_token()?;
@@ -81,7 +88,7 @@ fn parse_full_ident(scanner: &mut Scanner, term_token: Token) -> Result<FullIden
             rparen = true;
             match first_ident {
                 Token::Ident(s) => idents.push(s),
-                _ => return Err("FullIdenct: identifier expected")
+                _ => return Err("FullIden   t: identifier expected")
             }
         }
         _ => return Err("FullIdent: identifier expected")
@@ -116,7 +123,7 @@ fn parse_full_ident(scanner: &mut Scanner, term_token: Token) -> Result<FullIden
     return Ok(FullIdent{idents: idents});
 }
 
-fn parse_option(mut scanner: &mut Scanner) -> Result<ProtoOption, &'static str> {
+fn parse_option(scanner: &mut Scanner) -> Result<ProtoOption, &'static str> {
 
     let ident = parse_full_ident(scanner, Token::Eq)?;
     let constant = parse_constant(scanner)?;
@@ -128,7 +135,7 @@ fn parse_option(mut scanner: &mut Scanner) -> Result<ProtoOption, &'static str> 
 }
 
 //also parses the semicolon!
-fn parse_constant(mut scanner: &mut Scanner) -> Result<ConstantValue, &'static str> {
+fn parse_constant(scanner: &mut Scanner) -> Result<ConstantValue, &'static str> {
     let next = scanner.next_token()?;
     match next {
         Token::StrLit(s) => {
@@ -152,7 +159,7 @@ fn parse_constant(mut scanner: &mut Scanner) -> Result<ConstantValue, &'static s
                 rest_ident.insert(0, n);
                 return Ok(ConstantValue::IdentValue(rest_ident));
             }
-            return Err("unexepcted token in constant identifier")
+            return Err("unexepected token in constant identifier")
         },
         Token::Plus => {
             let num = scanner.next_token()?;
@@ -174,7 +181,49 @@ fn parse_constant(mut scanner: &mut Scanner) -> Result<ConstantValue, &'static s
     // TODO parse +, - num values
 }
 
-fn expect(mut scanner: &mut Scanner, expected: Token) -> Result<Token, &'static str> {
+fn parse_service(scanner: &mut Scanner) -> Result<Service, &'static str> {
+
+    let name = expect_ident(scanner)?;
+    expect(scanner, Token::LCurly)?;
+
+    let mut rpcs = Vec::new();
+    let mut next = scanner.next_token()?;
+    while next == Token::Rpc {
+        let rpc_def = parse_rpc(scanner)?;
+        rpcs.push(rpc_def);
+        next = scanner.next_token()?;
+    }
+
+    if next != Token::RCurly {
+        return Err("Unexpected token, expected }");
+    }
+
+    return Ok(Service{name: name, rpcs});
+}
+
+fn parse_rpc(scanner: &mut Scanner) -> Result<Rpc, &'static str> {
+    let name = expect_ident(scanner)?;
+
+    expect(scanner, Token::LParen)?;
+    let req_message_type = parse_full_ident(scanner, Token::RParen)?;
+    expect(scanner, Token::Returns)?;
+
+    expect(scanner, Token::LParen)?;
+    let resp_message_type = parse_full_ident(scanner, Token::RParen)?;
+    expect(scanner, Token::Semicolon)?;
+
+    return Ok(Rpc{name, request_type: req_message_type, response_type: resp_message_type });
+}
+
+fn expect_ident(scanner: &mut Scanner) -> Result<String, &'static str> {
+    let next = scanner.next_token()?;
+    match next {
+        Token::Ident(name) => Ok(name),
+        _ => Err("Ident expected")
+    }
+}
+
+fn expect(scanner: &mut Scanner, expected: Token) -> Result<Token, &'static str> {
     let next = scanner.next_token();
     if let Err(e) = next {
         return Err(e);

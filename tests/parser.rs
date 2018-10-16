@@ -163,6 +163,73 @@ fn parse_option_with_minus_prefixed_number() {
     assert_eq!(result.options[0].constant, ConstantValue::NumberValue(-42.0));
 }
 
+//TODO parse empty service
+
+#[test]
+fn parse_empty_service() {
+    let input = min_file()  + "service EmptyService {
+    }
+    ";
+    let result = parse(&input).unwrap();
+
+    assert_eq!(result.services.len(), 1);
+    assert_eq!(result.services[0].name, "EmptyService");
+    assert_eq!(result.services[0].rpcs.len(), 0);
+
+}
+
+#[test]
+fn parse_service() {
+    let input = min_file()  + "service GatewayService {
+      rpc GetGreeting(GetGreetingReq) returns (GetGreetingRsp);
+    }
+    ";
+    let result = parse(&input).unwrap();
+
+    assert_eq!(result.services.len(), 1);
+    assert_eq!(result.services[0].name, "GatewayService");
+    assert_eq!(result.services[0].rpcs.len(), 1);
+    assert_eq!(result.services[0].rpcs[0].name, "GetGreeting");
+    assert_eq!(result.services[0].rpcs[0].request_type.idents.len(), 1);
+    assert_eq!(result.services[0].rpcs[0].request_type.idents[0], "GetGreetingReq");
+
+    assert_eq!(result.services[0].rpcs[0].response_type.idents.len(), 1);
+    assert_eq!(result.services[0].rpcs[0].response_type.idents[0], "GetGreetingRsp");
+}
+
+#[test]
+fn parse_service_with_3_rpcs() {
+    let input = min_file()  + "service ServiceWith3 {
+      rpc Rpc1(Req1) returns (Rsp1);
+      rpc Rpc2(Req2) returns (Rsp2);
+      rpc Rpc3(Req3) returns (Rsp3);
+    }
+    ";
+    let result = parse(&input).unwrap();
+
+    assert_eq!(result.services.len(), 1);
+    assert_eq!(result.services[0].name, "ServiceWith3");
+
+    assert_eq!(result.services[0].rpcs.len(), 3);
+    assert_eq!(result.services[0].rpcs[0].name, "Rpc1");
+    assert_eq!(result.services[0].rpcs[0].request_type.idents.len(), 1);
+    assert_eq!(result.services[0].rpcs[0].request_type.idents[0], "Req1");
+    assert_eq!(result.services[0].rpcs[0].response_type.idents.len(), 1);
+    assert_eq!(result.services[0].rpcs[0].response_type.idents[0], "Rsp1");
+
+    assert_eq!(result.services[0].rpcs[1].name, "Rpc2");
+    assert_eq!(result.services[0].rpcs[1].request_type.idents.len(), 1);
+    assert_eq!(result.services[0].rpcs[1].request_type.idents[0], "Req2");
+    assert_eq!(result.services[0].rpcs[1].response_type.idents.len(), 1);
+    assert_eq!(result.services[0].rpcs[1].response_type.idents[0], "Rsp2");
+
+    assert_eq!(result.services[0].rpcs[2].name, "Rpc3");
+    assert_eq!(result.services[0].rpcs[2].request_type.idents.len(), 1);
+    assert_eq!(result.services[0].rpcs[2].request_type.idents[0], "Req3");
+    assert_eq!(result.services[0].rpcs[2].response_type.idents.len(), 1);
+    assert_eq!(result.services[0].rpcs[2].response_type.idents[0], "Rsp3");
+}
+
 // helper methods
 
 fn min_file() -> String {
