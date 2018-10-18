@@ -1,6 +1,7 @@
 extern crate protoparse;
 
 use protoparse::scanner::{Scanner, Token};
+use protoparse::error::{err};
 
 #[test]
 fn should_return_eof_for_empty_input() {
@@ -210,14 +211,14 @@ fn should_scan_str_literal_with_escaping() {
 fn should_return_err_on_unknown_escape() {
     let input = "\"\\k\"".to_string();
     let mut scanner = Scanner::new(&input);
-    assert_eq!(scanner.next_token(), Err("Lexical error: unknown escaping"));
+    assert_eq!(scanner.next_token(), err("Lexical error: unknown escaping"));
 }
 
 #[test]
 fn should_return_err_on_non_closed_str_literal() {
     let input = "\"foo message".to_string();
     let mut scanner = Scanner::new(&input);
-    assert_eq!(scanner.next_token(), Err("Lexical error: unclosed string literal"));
+    assert_eq!(scanner.next_token(), err("Lexical error: unclosed string literal"));
 }
 
 #[test]

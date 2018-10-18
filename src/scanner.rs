@@ -5,6 +5,8 @@ use std::collections::HashMap;
 use std::result::Result;
 use std::str;
 
+use super::error::{err, ProtoParseError};
+
 #[derive(Debug, PartialEq, Clone)]
 pub enum Token {
     Syntax,
@@ -122,7 +124,7 @@ impl<'a> Scanner<'a> {
         return Scanner{buf: buffer.chars().peekable()};
     }
 
-    pub fn next_token(&mut self) -> Result<Token, &'static str> {
+    pub fn next_token(&mut self) -> Result<Token, ProtoParseError> {
         self.unread_whitespace();
 
         let mut token = String::new();
@@ -134,7 +136,7 @@ impl<'a> Scanner<'a> {
             match peek {
                 None => {
                     if str_lit {
-                        return Err("Lexical error: unclosed string literal");
+                        return err("Lexical error: unclosed string literal");
                     }
                     return Ok(Token::EOF)
                 },
@@ -158,7 +160,7 @@ impl<'a> Scanner<'a> {
                             }
                             _ => {
                                 if escaped {
-                                    return Err("Lexical error: unknown escaping");
+                                    return err("Lexical error: unknown escaping");
                                 }
                                 token.push(c); self.buf.next();
                             }
@@ -204,7 +206,7 @@ impl<'a> Scanner<'a> {
         if dec_lit {
             let dec = token.parse::<u32>();
             match dec {
-                Err(_) => return Err("Lexical error: illegal decimal literal"),
+                Err(_) => return err("Lexical error: illegal decimal literal"),
                 Ok(n) => return Ok(Token::DecimalLit(n))
             }
         }

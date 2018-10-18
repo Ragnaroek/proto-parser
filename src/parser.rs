@@ -1,7 +1,8 @@
 use super::scanner::{Scanner, Token};
+use super::error::{err, ProtoParseError};
 use super::ast::*;
 
-pub fn parse(buffer: &String) -> Result<ProtoDef, &str> {
+pub fn parse(buffer: &String) -> Result<ProtoDef, ProtoParseError> {
     let mut scanner = Scanner::new(buffer);
 
     let syn = parse_syntax(&mut scanner)?;
@@ -10,7 +11,7 @@ pub fn parse(buffer: &String) -> Result<ProtoDef, &str> {
     let mut lookahead = scanner.next_token()?;
     while lookahead != Token::EOF {
         match lookahead {
-            //TODO parse also service, message, enum
+            //TODO parse also message, enum
             Token::Import => {
                 let imp = parse_import(&mut scanner)?;
                 def.add_import(imp);
@@ -29,8 +30,7 @@ pub fn parse(buffer: &String) -> Result<ProtoDef, &str> {
             },
             Token::Semicolon => {} //simply ignore that
             token => {
-                println!("unexpected token: {:?}", token);
-                return Err("unexpected token");
+                return err(&format!("unexpected token {:?}", token));
             }
         }
 
@@ -39,7 +39,7 @@ pub fn parse(buffer: &String) -> Result<ProtoDef, &str> {
     return Ok(def);
 }
 
-fn parse_syntax(scanner: &mut Scanner) -> Result<Syntax, &'static str> {
+fn parse_syntax(scanner: &mut Scanner) -> Result<Syntax, ProtoParseError> {
     expect(scanner, Token::Syntax)?;
     expect(scanner, Token::Eq)?;
     expect(scanner, Token::StrLit("proto3".to_string()))?;
@@ -47,7 +47,7 @@ fn parse_syntax(scanner: &mut Scanner) -> Result<Syntax, &'static str> {
     return Ok(Syntax::V3);
 }
 
-fn parse_import(scanner: &mut Scanner) -> Result<Import, &'static str> {
+fn parse_import(scanner: &mut Scanner) -> Result<Import, ProtoParseError> {
     let mut next = scanner.next_token()?;
 
     let mut import_type = ImportType::Default;
@@ -61,7 +61,7 @@ fn parse_import(scanner: &mut Scanner) -> Result<Import, &'static str> {
 
     let name = match next {
         Token::StrLit(s) => s,
-        _ => return Err("string literal expected in import")
+        _ => return err("string literal expected in import")
     };
 
     expect(scanner, Token::Semicolon)?;
@@ -69,13 +69,13 @@ fn parse_import(scanner: &mut Scanner) -> Result<Import, &'static str> {
     return Ok(Import{import_type, name});
 }
 
-fn parse_package(scanner: &mut Scanner) -> Result<Package, &'static str> {
+fn parse_package(scanner: &mut Scanner) -> Result<Package, ProtoParseError> {
     let full_ident = parse_full_ident(scanner, Token::Semicolon)?;
     return Ok(Package{full_ident: full_ident});
 }
 
 //term_token is consumed
-fn parse_full_ident(scanner: &mut Scanner, term_token: Token) -> Result<FullIdent, &'static str> {
+fn parse_full_ident(scanner: &mut Scanner, term_token: Token) -> Result<FullIdent, ProtoParseError> {
 
     let mut idents = Vec::new();
     let mut rparen = false;
@@ -88,10 +88,10 @@ fn parse_full_ident(scanner: &mut Scanner, term_token: Token) -> Result<FullIden
             rparen = true;
             match first_ident {
                 Token::Ident(s) => idents.push(s),
-                _ => return Err("FullIden   t: identifier expected")
+                _ => return err("FullIdent: identifier expected")
             }
         }
-        _ => return Err("FullIdent: identifier expected")
+        _ => return err("FullIdent: identifier expected")
     }
 
     let mut ident_term = term_token.clone();
@@ -106,12 +106,12 @@ fn parse_full_ident(scanner: &mut Scanner, term_token: Token) -> Result<FullIden
         }
 
         if next != Token::Dot {
-            return Err("FullIdent: . expected");
+            return err("FullIdent: . expected");
         }
         next = scanner.next_token()?;
         match next {
             Token::Ident(s) => idents.push(s),
-            _ => return Err("FullIdent: identifier expected")
+            _ => return err("FullIdent: identifier expected")
         }
         next = scanner.next_token()?;
     }
@@ -123,7 +123,7 @@ fn parse_full_ident(scanner: &mut Scanner, term_token: Token) -> Result<FullIden
     return Ok(FullIdent{idents: idents});
 }
 
-fn parse_option(scanner: &mut Scanner) -> Result<ProtoOption, &'static str> {
+fn parse_option(scanner: &mut Scanner) -> Result<ProtoOption, ProtoParseError> {
 
     let ident = parse_full_ident(scanner, Token::Eq)?;
     let constant = parse_constant(scanner)?;
@@ -135,7 +135,7 @@ fn parse_option(scanner: &mut Scanner) -> Result<ProtoOption, &'static str> {
 }
 
 //also parses the semicolon!
-fn parse_constant(scanner: &mut Scanner) -> Result<ConstantValue, &'static str> {
+fn parse_constant(scanner: &mut Scanner) -> Result<ConstantValue, ProtoParseError> {
     let next = scanner.next_token()?;
     match next {
         Token::StrLit(s) => {
@@ -159,29 +159,29 @@ fn parse_constant(scanner: &mut Scanner) -> Result<ConstantValue, &'static str> 
                 rest_ident.insert(0, n);
                 return Ok(ConstantValue::IdentValue(rest_ident));
             }
-            return Err("unexepected token in constant identifier")
+            return err("unexepected token in constant identifier")
         },
         Token::Plus => {
             let num = scanner.next_token()?;
             match num {
                 Token::DecimalLit(d) => return Ok(ConstantValue::NumberValue(d as f32)),
-                _ => Err("unexpected token after +")
+                _ => err("unexpected token after +")
             }
         },
         Token::Minus => {
             let num = scanner.next_token()?;
             match num {
                 Token::DecimalLit(d) => return Ok(ConstantValue::NumberValue(-(d as f32))),
-                _ => Err("unexpected token after -")
+                _ => err("unexpected token after -")
             }
         },
-        _ => Err("unexpected token in constant expression")
+        _ => err("unexpected token in constant expression")
     }
 
     // TODO parse +, - num values
 }
 
-fn parse_service(scanner: &mut Scanner) -> Result<Service, &'static str> {
+fn parse_service(scanner: &mut Scanner) -> Result<Service, ProtoParseError> {
 
     let name = expect_ident(scanner)?;
     expect(scanner, Token::LCurly)?;
@@ -195,13 +195,13 @@ fn parse_service(scanner: &mut Scanner) -> Result<Service, &'static str> {
     }
 
     if next != Token::RCurly {
-        return Err("Unexpected token, expected }");
+        return err("Unexpected token, expected }");
     }
 
     return Ok(Service{name: name, rpcs});
 }
 
-fn parse_rpc(scanner: &mut Scanner) -> Result<Rpc, &'static str> {
+fn parse_rpc(scanner: &mut Scanner) -> Result<Rpc, ProtoParseError> {
     let name = expect_ident(scanner)?;
 
     expect(scanner, Token::LParen)?;
@@ -215,23 +215,19 @@ fn parse_rpc(scanner: &mut Scanner) -> Result<Rpc, &'static str> {
     return Ok(Rpc{name, request_type: req_message_type, response_type: resp_message_type });
 }
 
-fn expect_ident(scanner: &mut Scanner) -> Result<String, &'static str> {
+fn expect_ident(scanner: &mut Scanner) -> Result<String, ProtoParseError> {
     let next = scanner.next_token()?;
     match next {
         Token::Ident(name) => Ok(name),
-        _ => Err("Ident expected")
+        _ => err(&format!("Ident expected, got {:?}", next))
     }
 }
 
-fn expect(scanner: &mut Scanner, expected: Token) -> Result<Token, &'static str> {
-    let next = scanner.next_token();
-    if let Err(e) = next {
-        return Err(e);
-    }
+fn expect(scanner: &mut Scanner, expected: Token) -> Result<Token, ProtoParseError> {
+    let next = scanner.next_token()?;
 
-    let tk = next.unwrap();
-    if tk != expected {
-        return Err("unexpected token");
+    if next != expected {
+        return err(&format!("unexpected token, expected {:?} got {:?}", expected, next));
     }
-    return Ok(tk);
+    return Ok(next);
 }
