@@ -58,7 +58,7 @@ fn should_scan_package_stmt() {
 }
 
 #[test]
-fn should_can_simple_option() {
+fn should_scan_simple_option() {
     let input = "option java_package = \"com.example.foo\";".to_string();
     let mut scanner = Scanner::new(&input);
 
@@ -227,5 +227,13 @@ fn should_scan_plus_minus_symbols() {
     let mut scanner = Scanner::new(&input);
     assert_eq!(scanner.next_token(), Ok(Token::Plus));
     assert_eq!(scanner.next_token(), Ok(Token::Minus));
+    assert_eq!(scanner.next_token(), Ok(Token::EOF));
+}
+
+#[test]
+fn should_scan_repeated() {
+    let input = "repeated\n".to_string();
+    let mut scanner = Scanner::new(&input);
+    assert_eq!(scanner.next_token(), Ok(Token::Repeated));
     assert_eq!(scanner.next_token(), Ok(Token::EOF));
 }

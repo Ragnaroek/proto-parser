@@ -37,6 +37,7 @@ pub enum Token {
     Lt,
     Gt,
     Map,
+    Repeated,
     //types
     TDouble,
     TFloat,
@@ -76,6 +77,7 @@ lazy_static! {
         map.insert("true".into(), Token::BoolLit(true));
         map.insert("false".into(), Token::BoolLit(false));
         map.insert("map".into(), Token::Map);
+        map.insert("repeated".into(), Token::Repeated);
 
         map.insert("double".into(), Token::TDouble);
         map.insert("float".into(), Token::TFloat);

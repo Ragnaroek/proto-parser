@@ -222,8 +222,58 @@ fn parse_rpc(scanner: &mut Scanner) -> Result<Rpc, ProtoParseError> {
 fn parse_message(scanner: &mut Scanner) -> Result<Message, ProtoParseError> {
     let name = expect_ident(scanner)?;
     expect(scanner, Token::LCurly)?;
-    expect(scanner, Token::RCurly)?;
-    return Ok(Message{name});
+    let mut fields = Vec::new();
+    let mut peeked = scanner.next_token()?;
+    while peeked != Token::RCurly {
+        let field = parse_field(peeked, scanner)?;
+        fields.push(field);
+        peeked = scanner.next_token()?;
+    }
+    return Ok(Message{name, fields});
+}
+
+fn parse_field(peeked: Token, scanner: &mut Scanner) -> Result<Field, ProtoParseError> {
+    let mut next = peeked;
+    let mut repeated = false;
+    if next == Token::Repeated {
+        repeated = true;
+        next = scanner.next_token()?;
+    }
+    let field_type = is_type(next)?;
+    let name = expect_ident(scanner)?;
+    expect(scanner, Token::Eq)?;
+    let field_number = expect_decimal_lit(scanner)?;
+    expect(scanner, Token::Semicolon)?;
+    return Ok(Field{name, field_type, repeated, field_number})
+}
+
+fn is_type(token: Token) -> Result<Type, ProtoParseError> {
+    match token {
+        Token::TDouble => Ok(Type::Double),
+        Token::TFloat => Ok(Type::Float),
+        Token::TInt32 => Ok(Type::Int32),
+        Token::TInt64 => Ok(Type::Int64),
+        Token::TUint32 => Ok(Type::Uint32),
+        Token::TUint64 => Ok(Type::Uint64),
+        Token::TSint32 => Ok(Type::Sint32),
+        Token::TSint64 => Ok(Type::Sint64),
+        Token::TFixed32 => Ok(Type::Fixed32),
+        Token::TFixed64 => Ok(Type::Fixed64),
+        Token::TSfixed32 => Ok(Type::Sfixed32),
+        Token::TSfixed64 => Ok(Type::Sfixed64),
+        Token::TBool => Ok(Type::Bool),
+        Token::TString => Ok(Type::String),
+        Token::TBytes => Ok(Type::Bytes),
+        _ => err(&format!("unexpected token {:?}, expected type", token))
+    }
+}
+
+fn expect_decimal_lit(scanner: &mut Scanner) -> Result<u32, ProtoParseError> {
+    let next = scanner.next_token()?;
+    match next {
+        Token::DecimalLit(u) => Ok(u),
+        _ => err(&format!("DecimalLiteral expected, got {:?}", next))
+    }
 }
 
 fn expect_ident(scanner: &mut Scanner) -> Result<String, ProtoParseError> {

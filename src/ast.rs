@@ -67,6 +67,34 @@ pub struct Rpc {
 #[derive(Debug)]
 pub struct Message {
     pub name: String,
+    pub fields: Vec<Field>,
+}
+
+#[derive(Debug)]
+pub struct Field {
+    pub name: String,
+    pub field_type: Type,
+    pub repeated: bool,
+    pub field_number: u32,
+}
+
+#[derive(Debug, PartialEq)]
+pub enum Type {
+    Double,
+    Float,
+    Int32,
+    Int64,
+    Uint32,
+    Uint64,
+    Sint32,
+    Sint64,
+    Fixed32,
+    Fixed64,
+    Sfixed32,
+    Sfixed64,
+    Bool,
+    String,
+    Bytes,
 }
 
 #[derive(Debug)]

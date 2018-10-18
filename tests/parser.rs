@@ -239,6 +239,41 @@ fn parse_empty_message() {
     assert_eq!(result.messages[0].name, "EmptyMessage");
 }
 
+#[test]
+fn parse_message_with_fields() {
+    let input = min_file()  + "message MessageWithField {
+        string foo = 1;
+        repeated string bar = 2;
+        double baz = 3;
+        bool boo = 4;
+    }";
+
+    let result = parse(&input).unwrap();
+    assert_eq!(result.messages.len(), 1);
+    assert_eq!(result.messages[0].name, "MessageWithField");
+
+    assert_eq!(result.messages[0].fields.len(), 4);
+    assert_eq!(result.messages[0].fields[0].field_type, Type::String);
+    assert_eq!(result.messages[0].fields[0].name, "foo");
+    assert_eq!(result.messages[0].fields[0].repeated, false);
+    assert_eq!(result.messages[0].fields[0].field_number, 1);
+
+    assert_eq!(result.messages[0].fields[1].field_type, Type::String);
+    assert_eq!(result.messages[0].fields[1].name, "bar");
+    assert_eq!(result.messages[0].fields[1].repeated, true);
+    assert_eq!(result.messages[0].fields[1].field_number, 2);
+
+    assert_eq!(result.messages[0].fields[2].field_type, Type::Double);
+    assert_eq!(result.messages[0].fields[2].name, "baz");
+    assert_eq!(result.messages[0].fields[2].repeated, false);
+    assert_eq!(result.messages[0].fields[2].field_number, 3);
+
+    assert_eq!(result.messages[0].fields[3].field_type, Type::Bool);
+    assert_eq!(result.messages[0].fields[3].name, "boo");
+    assert_eq!(result.messages[0].fields[3].repeated, false);
+    assert_eq!(result.messages[0].fields[3].field_number, 4);
+}
+
 // helper methods
 
 fn min_file() -> String {
