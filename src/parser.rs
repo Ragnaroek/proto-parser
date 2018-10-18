@@ -28,6 +28,10 @@ pub fn parse(buffer: &String) -> Result<ProtoDef, ProtoParseError> {
                 let service = parse_service(&mut scanner)?;
                 def.add_service(service);
             },
+            Token::Message => {
+                let message = parse_message(&mut scanner)?;
+                def.add_message(message);
+            }
             Token::Semicolon => {} //simply ignore that
             token => {
                 return err(&format!("unexpected token {:?}", token));
@@ -213,6 +217,13 @@ fn parse_rpc(scanner: &mut Scanner) -> Result<Rpc, ProtoParseError> {
     expect(scanner, Token::Semicolon)?;
 
     return Ok(Rpc{name, request_type: req_message_type, response_type: resp_message_type });
+}
+
+fn parse_message(scanner: &mut Scanner) -> Result<Message, ProtoParseError> {
+    let name = expect_ident(scanner)?;
+    expect(scanner, Token::LCurly)?;
+    expect(scanner, Token::RCurly)?;
+    return Ok(Message{name});
 }
 
 fn expect_ident(scanner: &mut Scanner) -> Result<String, ProtoParseError> {

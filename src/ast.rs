@@ -65,12 +65,18 @@ pub struct Rpc {
 }
 
 #[derive(Debug)]
+pub struct Message {
+    pub name: String,
+}
+
+#[derive(Debug)]
 pub struct ProtoDef {
     pub syntax: Syntax,
     pub imports: Vec<Import>,
     pub packages: Vec<Package>,
     pub options: Vec<ProtoOption>,
     pub services: Vec<Service>,
+    pub messages: Vec<Message>,
 }
 
 impl ProtoDef {
@@ -81,6 +87,7 @@ impl ProtoDef {
             packages: Vec::new(),
             options: Vec::new(),
             services: Vec::new(),
+            messages: Vec::new(),
         };
     }
 
@@ -98,5 +105,9 @@ impl ProtoDef {
 
     pub fn add_service(&mut self, service: Service) {
         self.services.push(service);
+    }
+
+    pub fn add_message(&mut self, message: Message) {
+        self.messages.push(message);
     }
 }

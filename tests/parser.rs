@@ -230,6 +230,15 @@ fn parse_service_with_3_rpcs() {
     assert_eq!(result.services[0].rpcs[2].response_type.idents[0], "Rsp3");
 }
 
+#[test]
+fn parse_empty_message() {
+    let input = min_file()  + "message EmptyMessage {}";
+
+    let result = parse(&input).unwrap();
+    assert_eq!(result.messages.len(), 1);
+    assert_eq!(result.messages[0].name, "EmptyMessage");
+}
+
 // helper methods
 
 fn min_file() -> String {
