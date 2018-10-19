@@ -214,7 +214,15 @@ fn parse_rpc(scanner: &mut Scanner) -> Result<Rpc, ProtoParseError> {
 
     expect(scanner, Token::LParen)?;
     let resp_message_type = parse_full_ident(scanner, Token::RParen)?;
-    expect(scanner, Token::Semicolon)?;
+
+    let next = scanner.next_token()?;
+    if next == Token::LCurly {
+        expect(scanner, Token::RCurly)?;
+    } else if next == Token::Semicolon {
+        //do nothing
+    } else {
+        return err("unexpected token, Semicolon or {} expected")
+    }
 
     return Ok(Rpc{name, request_type: req_message_type, response_type: resp_message_type });
 }

@@ -175,13 +175,31 @@ fn parse_empty_service() {
     assert_eq!(result.services.len(), 1);
     assert_eq!(result.services[0].name, "EmptyService");
     assert_eq!(result.services[0].rpcs.len(), 0);
-
 }
 
 #[test]
 fn parse_service() {
     let input = min_file()  + "service GatewayService {
       rpc GetGreeting(GetGreetingReq) returns (GetGreetingRsp);
+    }
+    ";
+    let result = parse(&input).unwrap();
+
+    assert_eq!(result.services.len(), 1);
+    assert_eq!(result.services[0].name, "GatewayService");
+    assert_eq!(result.services[0].rpcs.len(), 1);
+    assert_eq!(result.services[0].rpcs[0].name, "GetGreeting");
+    assert_eq!(result.services[0].rpcs[0].request_type.idents.len(), 1);
+    assert_eq!(result.services[0].rpcs[0].request_type.idents[0], "GetGreetingReq");
+
+    assert_eq!(result.services[0].rpcs[0].response_type.idents.len(), 1);
+    assert_eq!(result.services[0].rpcs[0].response_type.idents[0], "GetGreetingRsp");
+}
+
+#[test]
+fn parse_service_with_curly_brace_termination() {
+    let input = min_file()  + "service GatewayService {
+      rpc GetGreeting(GetGreetingReq) returns (GetGreetingRsp) {}
     }
     ";
     let result = parse(&input).unwrap();
@@ -272,6 +290,34 @@ fn parse_message_with_fields() {
     assert_eq!(result.messages[0].fields[3].name, "boo");
     assert_eq!(result.messages[0].fields[3].repeated, false);
     assert_eq!(result.messages[0].fields[3].field_number, 4);
+}
+
+#[test]
+fn parse_simple_proto_file() {
+    let input = r#"syntax = "proto3";
+
+    option go_package = "github.com/some/protoForGo";
+
+    package gateway;
+
+    service GatewayService {
+      rpc GetGreeting(GetGreetingReq) returns (GetGreetingRsp) {}
+    }
+
+    message GetGreetingReq {
+      string YourName = 1;
+    }
+
+    message GetGreetingRsp {
+      string Greeting = 1;
+  }"#.to_string();
+
+    let result = parse(&input).unwrap();
+
+    assert_eq!(result.options.len(), 1);
+    assert_eq!(result.packages.len(), 1);
+    assert_eq!(result.services.len(), 1);
+    assert_eq!(result.messages.len(), 2);
 }
 
 // helper methods
