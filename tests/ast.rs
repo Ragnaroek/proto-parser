@@ -1,6 +1,6 @@
-extern crate protoparser;
+extern crate protoparse;
 
-use protoparser::ast::*;
+use protoparse::ast::*;
 
 #[test]
 fn should_insert_into_full_ident() {

@@ -7,7 +7,7 @@ license = "GPL-3.0"
 repository = "https://github.com/Ragnaroek/proto-parser"
 
 [lib]
-name = "protoparser"
+name = "protoparse"
 
 [dependencies]
 lazy_static = "1.1.0"

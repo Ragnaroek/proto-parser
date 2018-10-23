@@ -1,7 +1,7 @@
-extern crate protoparser;
+extern crate protoparse;
 
-use protoparser::scanner::{Scanner, Token};
-use protoparser::error::{err};
+use protoparse::scanner::{Scanner, Token};
+use protoparse::error::{err};
 
 #[test]
 fn should_return_eof_for_empty_input() {
