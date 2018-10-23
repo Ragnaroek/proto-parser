@@ -2,9 +2,12 @@
 name = "protoparse"
 version = "0.0.1"
 authors = ["Michael Bohn <spaceodyssey@gmx.de>"]
+description = ".proto file parser"
+license = "GPL-3.0"
+repository = "https://github.com/Ragnaroek/proto-parser"
 
 [lib]
-name = "protoparse"
+name = "proto-parser"
 
 [dependencies]
 lazy_static = "1.1.0"
