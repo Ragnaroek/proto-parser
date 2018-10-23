@@ -1,7 +1,7 @@
-extern crate protoparse;
+extern crate protoparser;
 
-use protoparse::parser::{parse};
-use protoparse::ast::*;
+use protoparser::parser::{parse};
+use protoparser::ast::*;
 
 #[test]
 fn should_parse_syntax() {

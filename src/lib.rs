@@ -1,4 +1,4 @@
-#![crate_name = "protoparse"]
+#![crate_name = "protoparser"]
 #![crate_type = "lib"]
 
 #[macro_use]

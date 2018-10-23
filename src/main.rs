@@ -1,10 +1,10 @@
-extern crate protoparse;
+extern crate protoparser;
 
 use std::path::Path;
 use std::fs::File;
 use std::io::Read;
 
-use protoparse::parser::parse;
+use protoparser::parser::parse;
 
 // main (for manual testing)
 fn main() {
