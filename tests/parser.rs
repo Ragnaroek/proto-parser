@@ -1,6 +1,8 @@
 extern crate protoparse;
 
-use protoparse::parser::{parse};
+use std::path::Path;
+
+use protoparse::parser::{parse, parse_from_file};
 use protoparse::ast::*;
 
 #[test]
@@ -318,6 +320,17 @@ fn parse_simple_proto_file() {
     assert_eq!(result.packages.len(), 1);
     assert_eq!(result.services.len(), 1);
     assert_eq!(result.messages.len(), 2);
+}
+
+#[test]
+fn should_parse_from_file() {
+    parse_from_file(Path::new("tests/testdata/simple.proto")).unwrap();
+}
+
+#[test]
+#[should_panic]
+fn should_error_if_file_does_not_exist() {
+    parse_from_file(Path::new("does/not/exist.proto")).unwrap();
 }
 
 // helper methods

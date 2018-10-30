@@ -1,3 +1,7 @@
+use std::path::Path;
+use std::fs::File;
+use std::io::Read;
+
 use super::scanner::{Scanner, Token};
 use super::error::{err, ProtoParseError};
 use super::ast::*;
@@ -41,6 +45,20 @@ pub fn parse(buffer: &String) -> Result<ProtoDef, ProtoParseError> {
         lookahead = scanner.next_token()?;
     }
     return Ok(def);
+}
+
+pub fn parse_from_file(file: &Path) -> Result<ProtoDef, ProtoParseError> {
+    let mut buffer = String::new();
+    let open_result = File::open(file);
+    if open_result.is_err() {
+        return err("proto file cannot be opened");
+    }
+    let read_result = open_result.unwrap().read_to_string(&mut buffer);
+    if read_result.is_err() {
+        return err(&format!("cannot read file: {:?}", file));
+    }
+    //TODO handle error and return parse_error
+    return parse(&buffer);
 }
 
 fn parse_syntax(scanner: &mut Scanner) -> Result<Syntax, ProtoParseError> {

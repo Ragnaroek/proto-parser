@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option go_package = "github.com/some/protoForGo";
+
+package gateway;
+
+service GatewayService {
+  rpc GetGreeting(GetGreetingReq) returns (GetGreetingRsp) {}
+}
+
+message GetGreetingReq {
+  string YourName = 1;
+}
+
+message GetGreetingRsp {
+  string Greeting = 1;
+}
