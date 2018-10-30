@@ -1,6 +1,6 @@
 [package]
 name = "protoparse"
-version = "0.0.2"
+version = "0.0.3"
 authors = ["Michael Bohn <spaceodyssey@gmx.de>"]
 description = ".proto file parser"
 license = "GPL-3.0"
