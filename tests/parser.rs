@@ -295,6 +295,24 @@ fn parse_message_with_fields() {
 }
 
 #[test]
+fn parse_message_with_keyword_identifier() {
+    let input = min_file()  + "message HelloReply {
+      string message = 1;
+    }";
+
+    let result = parse(&input).unwrap();
+
+    assert_eq!(result.messages.len(), 1);
+    assert_eq!(result.messages[0].name, "HelloReply");
+
+    assert_eq!(result.messages[0].fields.len(), 1);
+    assert_eq!(result.messages[0].fields[0].field_type, Type::String);
+    assert_eq!(result.messages[0].fields[0].name, "message");
+    assert_eq!(result.messages[0].fields[0].repeated, false);
+    assert_eq!(result.messages[0].fields[0].field_number, 1);
+}
+
+#[test]
 fn parse_simple_proto_file() {
     let input = r#"syntax = "proto3";
 
@@ -323,7 +341,7 @@ fn parse_simple_proto_file() {
 }
 
 #[test]
-fn should_parse_from_file() {
+fn should_parse_from_file_simple_example() {
     parse_from_file(Path::new("tests/testdata/simple.proto")).unwrap();
 }
 
@@ -332,6 +350,13 @@ fn should_parse_from_file() {
 fn should_error_if_file_does_not_exist() {
     parse_from_file(Path::new("does/not/exist.proto")).unwrap();
 }
+
+//take from: https://github.com/grpc/grpc-go/tree/master/examples/helloworld
+#[test]
+fn should_parse_helloworld_example() {
+    parse_from_file(Path::new("tests/testdata/helloworld.proto")).unwrap();
+}
+
 
 // helper methods
 

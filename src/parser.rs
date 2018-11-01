@@ -266,7 +266,7 @@ fn parse_field(peeked: Token, scanner: &mut Scanner) -> Result<Field, ProtoParse
         next = scanner.next_token()?;
     }
     let field_type = is_type(next)?;
-    let name = expect_ident(scanner)?;
+    let name = expect_keyword_ident(scanner)?;
     expect(scanner, Token::Eq)?;
     let field_number = expect_decimal_lit(scanner)?;
     expect(scanner, Token::Semicolon)?;
@@ -306,6 +306,17 @@ fn expect_ident(scanner: &mut Scanner) -> Result<String, ProtoParseError> {
     let next = scanner.next_token()?;
     match next {
         Token::Ident(name) => Ok(name),
+        _ => err(&format!("Ident expected, got {:?}", next))
+    }
+}
+
+//a "real" ident, or a keyword that can be used as an ident
+fn expect_keyword_ident(scanner: &mut Scanner) -> Result<String, ProtoParseError> {
+    let next = scanner.next_token()?;
+    match next {
+        Token::Ident(name) => Ok(name),
+        Token::Message => Ok("message".to_string()),
+        //TODO more keywords are allowed as ident name, list them here
         _ => err(&format!("Ident expected, got {:?}", next))
     }
 }
