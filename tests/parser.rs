@@ -165,8 +165,6 @@ fn parse_option_with_minus_prefixed_number() {
     assert_eq!(result.options[0].constant, ConstantValue::NumberValue(-42.0));
 }
 
-//TODO parse empty service
-
 #[test]
 fn parse_empty_service() {
     let input = min_file()  + "service EmptyService {
@@ -351,7 +349,7 @@ fn should_error_if_file_does_not_exist() {
     parse_from_file(Path::new("does/not/exist.proto")).unwrap();
 }
 
-//take from: https://github.com/grpc/grpc-go/tree/master/examples/helloworld
+//taken from: https://github.com/grpc/grpc-go/tree/master/examples/helloworld
 #[test]
 fn should_parse_helloworld_example() {
     parse_from_file(Path::new("tests/testdata/helloworld.proto")).unwrap();

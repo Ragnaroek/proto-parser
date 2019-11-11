@@ -10,4 +10,4 @@ repository = "https://github.com/Ragnaroek/proto-parser"
 name = "protoparse"
 
 [dependencies]
-lazy_static = "1.1.0"
+lazy_static = "1.4.0"
