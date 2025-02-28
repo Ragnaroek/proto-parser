@@ -1,30 +1,29 @@
-
 #[derive(Debug, PartialEq)]
 pub enum Syntax {
-    V3
+    V3,
 }
 
 #[derive(Debug, PartialEq)]
 pub enum ImportType {
     Default,
     Weak,
-    Public
+    Public,
 }
 
 #[derive(Debug)]
 pub struct Import {
     pub import_type: ImportType,
-    pub name: String
+    pub name: String,
 }
 
 #[derive(Debug, PartialEq)]
 pub struct FullIdent {
-    pub idents: Vec<String>
+    pub idents: Vec<String>,
 }
 
 impl FullIdent {
     pub fn new(v: Vec<String>) -> FullIdent {
-        return FullIdent{idents: v};
+        return FullIdent { idents: v };
     }
 
     pub fn insert(&mut self, ix: usize, n: String) {
@@ -34,13 +33,13 @@ impl FullIdent {
 
 #[derive(Debug)]
 pub struct Package {
-    pub full_ident: FullIdent
+    pub full_ident: FullIdent,
 }
 
 #[derive(Debug)]
 pub struct ProtoOption {
     pub full_ident: FullIdent,
-    pub constant: ConstantValue
+    pub constant: ConstantValue,
 }
 
 #[derive(Debug, PartialEq)]
@@ -48,20 +47,20 @@ pub enum ConstantValue {
     IdentValue(FullIdent),
     NumberValue(f32),
     StringValue(String),
-    BoolValue(bool)
+    BoolValue(bool),
 }
 
 #[derive(Debug)]
 pub struct Service {
     pub name: String,
-    pub rpcs: Vec<Rpc>
+    pub rpcs: Vec<Rpc>,
 }
 
 #[derive(Debug)]
 pub struct Rpc {
     pub name: String,
     pub request_type: FullIdent,
-    pub response_type: FullIdent
+    pub response_type: FullIdent,
 }
 
 #[derive(Debug)]
@@ -109,7 +108,7 @@ pub struct ProtoDef {
 
 impl ProtoDef {
     pub fn new(syn: Syntax) -> ProtoDef {
-        return ProtoDef{
+        return ProtoDef {
             syntax: syn,
             imports: Vec::new(),
             packages: Vec::new(),

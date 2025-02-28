@@ -1,11 +1,10 @@
-
-use std::str::Chars;
-use std::iter::Peekable;
 use std::collections::HashMap;
+use std::iter::Peekable;
 use std::result::Result;
 use std::str;
+use std::str::Chars;
 
-use super::error::{err, ProtoParseError};
+use super::error::{ProtoParseError, err};
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Token {
@@ -56,7 +55,7 @@ pub enum Token {
     TBytes,
     EOF,
     Plus,
-    Minus
+    Minus,
 }
 
 //use rust_phf once feature(plugin) can be used in the non-nightly
@@ -98,32 +97,32 @@ lazy_static! {
     };
 }
 
-
 pub struct Scanner<'a> {
-    buf: Peekable<Chars<'a>>
+    buf: Peekable<Chars<'a>>,
 }
 
 fn non_ident_char(c: char) -> bool {
-    return c == '{' ||
-           c == '}' ||
-           c == '[' ||
-           c == ']' ||
-           c == '(' ||
-           c == ')' ||
-           c == '=' ||
-           c == ',' ||
-           c == ';' ||
-           c == '<' ||
-           c == '>' ||
-           c == '.' ||
-           c == '+' ||
-           c == '-';
+    return c == '{'
+        || c == '}'
+        || c == '['
+        || c == ']'
+        || c == '('
+        || c == ')'
+        || c == '='
+        || c == ','
+        || c == ';'
+        || c == '<'
+        || c == '>'
+        || c == '.'
+        || c == '+'
+        || c == '-';
 }
 
 impl<'a> Scanner<'a> {
-
     pub fn new(buffer: &'a String) -> Scanner<'a> {
-        return Scanner{buf: buffer.chars().peekable()};
+        return Scanner {
+            buf: buffer.chars().peekable(),
+        };
     }
 
     pub fn next_token(&mut self) -> Result<Token, ProtoParseError> {
@@ -140,53 +139,113 @@ impl<'a> Scanner<'a> {
                     if str_lit {
                         return err("Lexical error: unclosed string literal");
                     }
-                    return Ok(Token::EOF)
-                },
+                    return Ok(Token::EOF);
+                }
                 Some(c) => {
                     if str_lit {
                         match c {
                             // TODO there are more escaping chars in proto
-                            '"'  => {
+                            '"' => {
                                 if escaped {
-                                    self.buf.next(); token.push(c); escaped = false;
+                                    self.buf.next();
+                                    token.push(c);
+                                    escaped = false;
                                 } else {
-                                    self.buf.next(); break;
+                                    self.buf.next();
+                                    break;
                                 }
                             }
                             '\\' => {
                                 if escaped {
-                                    self.buf.next(); token.push(c); escaped = false;
+                                    self.buf.next();
+                                    token.push(c);
+                                    escaped = false;
                                 } else {
-                                    escaped = true; self.buf.next();
+                                    escaped = true;
+                                    self.buf.next();
                                 }
                             }
                             _ => {
                                 if escaped {
                                     return err("Lexical error: unknown escaping");
                                 }
-                                token.push(c); self.buf.next();
+                                token.push(c);
+                                self.buf.next();
                             }
                         }
                     } else {
                         if token.len() == 0 {
                             match c {
-                                '/' => {self.unread_line_comment(); continue},
-                                '{' => {self.buf.next(); return Ok(Token::LCurly)},
-                                '}' => {self.buf.next(); return Ok(Token::RCurly)},
-                                '=' => {self.buf.next(); return Ok(Token::Eq)},
-                                '(' => {self.buf.next(); return Ok(Token::LParen)},
-                                ')' => {self.buf.next(); return Ok(Token::RParen)},
-                                ',' => {self.buf.next(); return Ok(Token::Comma)},
-                                ';' => {self.buf.next(); return Ok(Token::Semicolon)},
-                                '.' => {self.buf.next(); return Ok(Token::Dot)},
-                                '[' => {self.buf.next(); return Ok(Token::LBracket)},
-                                ']' => {self.buf.next(); return Ok(Token::RBracket)},
-                                '<' => {self.buf.next(); return Ok(Token::Lt)},
-                                '>' => {self.buf.next(); return Ok(Token::Gt)},
-                                '+' => {self.buf.next(); return Ok(Token::Plus)},
-                                '-' => {self.buf.next(); return Ok(Token::Minus)},
-                                '"' => {str_lit = true; self.buf.next(); continue},
-                                ch if ch.is_digit(10) => {dec_lit = true; token.push(c); self.buf.next();},
+                                '/' => {
+                                    self.unread_line_comment();
+                                    continue;
+                                }
+                                '{' => {
+                                    self.buf.next();
+                                    return Ok(Token::LCurly);
+                                }
+                                '}' => {
+                                    self.buf.next();
+                                    return Ok(Token::RCurly);
+                                }
+                                '=' => {
+                                    self.buf.next();
+                                    return Ok(Token::Eq);
+                                }
+                                '(' => {
+                                    self.buf.next();
+                                    return Ok(Token::LParen);
+                                }
+                                ')' => {
+                                    self.buf.next();
+                                    return Ok(Token::RParen);
+                                }
+                                ',' => {
+                                    self.buf.next();
+                                    return Ok(Token::Comma);
+                                }
+                                ';' => {
+                                    self.buf.next();
+                                    return Ok(Token::Semicolon);
+                                }
+                                '.' => {
+                                    self.buf.next();
+                                    return Ok(Token::Dot);
+                                }
+                                '[' => {
+                                    self.buf.next();
+                                    return Ok(Token::LBracket);
+                                }
+                                ']' => {
+                                    self.buf.next();
+                                    return Ok(Token::RBracket);
+                                }
+                                '<' => {
+                                    self.buf.next();
+                                    return Ok(Token::Lt);
+                                }
+                                '>' => {
+                                    self.buf.next();
+                                    return Ok(Token::Gt);
+                                }
+                                '+' => {
+                                    self.buf.next();
+                                    return Ok(Token::Plus);
+                                }
+                                '-' => {
+                                    self.buf.next();
+                                    return Ok(Token::Minus);
+                                }
+                                '"' => {
+                                    str_lit = true;
+                                    self.buf.next();
+                                    continue;
+                                }
+                                ch if ch.is_digit(10) => {
+                                    dec_lit = true;
+                                    token.push(c);
+                                    self.buf.next();
+                                }
                                 _ => {
                                     token.push(c);
                                     self.buf.next();
@@ -209,7 +268,7 @@ impl<'a> Scanner<'a> {
             let dec = token.parse::<u32>();
             match dec {
                 Err(_) => return err("Lexical error: illegal decimal literal"),
-                Ok(n) => return Ok(Token::DecimalLit(n))
+                Ok(n) => return Ok(Token::DecimalLit(n)),
             }
         }
 
@@ -221,7 +280,7 @@ impl<'a> Scanner<'a> {
         if lookup_token.is_some() {
             return Ok(lookup_token.unwrap().clone());
         }
-        return Ok(Token::Ident(token))
+        return Ok(Token::Ident(token));
     }
 
     fn unread_line_comment(&mut self) {

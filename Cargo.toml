@@ -1,6 +1,7 @@
 [package]
 name = "protoparse"
 version = "0.0.4"
+edition = "2024"
 authors = ["Michael Bohn <spaceodyssey@gmx.de>"]
 description = ".proto file parser"
 license = "GPL-3.0"
@@ -10,4 +11,4 @@ repository = "https://github.com/Ragnaroek/proto-parser"
 name = "protoparse"
 
 [dependencies]
-lazy_static = "1.4.0"
+lazy_static = "1.5.0"

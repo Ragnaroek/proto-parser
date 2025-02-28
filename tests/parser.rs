@@ -2,8 +2,8 @@ extern crate protoparse;
 
 use std::path::Path;
 
-use protoparse::parser::{parse, parse_from_file};
 use protoparse::ast::*;
+use protoparse::parser::{parse, parse_from_file};
 
 #[test]
 fn should_parse_syntax() {
@@ -84,7 +84,10 @@ fn parse_option_with_simple_ident_and_number_value() {
 
     assert_eq!(result.options.len(), 1);
     assert_eq!(result.options[0].full_ident.idents.len(), 1);
-    assert_eq!(result.options[0].full_ident.idents[0], "my_option".to_string());
+    assert_eq!(
+        result.options[0].full_ident.idents[0],
+        "my_option".to_string()
+    );
     assert_eq!(result.options[0].constant, ConstantValue::NumberValue(42.0));
 }
 
@@ -94,7 +97,10 @@ fn parse_option_string_value() {
     let result = parse(&input).unwrap();
 
     assert_eq!(result.options.len(), 1);
-    assert_eq!(result.options[0].constant, ConstantValue::StringValue("strOpt".to_string()));
+    assert_eq!(
+        result.options[0].constant,
+        ConstantValue::StringValue("strOpt".to_string())
+    );
 }
 
 #[test]
@@ -112,7 +118,14 @@ fn parse_option_full_ident_value() {
     let result = parse(&input).unwrap();
 
     assert_eq!(result.options.len(), 1);
-    assert_eq!(result.options[0].constant, ConstantValue::IdentValue(FullIdent::new(vec!["my".to_string(), "ident".to_string(), "value".to_string()])));
+    assert_eq!(
+        result.options[0].constant,
+        ConstantValue::IdentValue(FullIdent::new(vec![
+            "my".to_string(),
+            "ident".to_string(),
+            "value".to_string()
+        ]))
+    );
 }
 
 #[test]
@@ -123,7 +136,10 @@ fn parse_option_with_full_ident_name() {
 
     assert_eq!(result.options.len(), 1);
     assert_eq!(result.options[0].full_ident.idents.len(), 4);
-    assert_eq!(result.options[0].full_ident.idents[0], "my_option".to_string());
+    assert_eq!(
+        result.options[0].full_ident.idents[0],
+        "my_option".to_string()
+    );
     assert_eq!(result.options[0].full_ident.idents[1], "full".to_string());
     assert_eq!(result.options[0].full_ident.idents[2], "ident".to_string());
     assert_eq!(result.options[0].full_ident.idents[3], "name".to_string());
@@ -139,7 +155,10 @@ fn parse_option_with_full_ident_name_in_paren() {
 
     assert_eq!(result.options.len(), 1);
     assert_eq!(result.options[0].full_ident.idents.len(), 4);
-    assert_eq!(result.options[0].full_ident.idents[0], "my_option".to_string());
+    assert_eq!(
+        result.options[0].full_ident.idents[0],
+        "my_option".to_string()
+    );
     assert_eq!(result.options[0].full_ident.idents[1], "full".to_string());
     assert_eq!(result.options[0].full_ident.idents[2], "ident".to_string());
     assert_eq!(result.options[0].full_ident.idents[3], "name".to_string());
@@ -162,12 +181,16 @@ fn parse_option_with_minus_prefixed_number() {
     let result = parse(&input).unwrap();
 
     assert_eq!(result.options.len(), 1);
-    assert_eq!(result.options[0].constant, ConstantValue::NumberValue(-42.0));
+    assert_eq!(
+        result.options[0].constant,
+        ConstantValue::NumberValue(-42.0)
+    );
 }
 
 #[test]
 fn parse_empty_service() {
-    let input = min_file()  + "service EmptyService {
+    let input = min_file()
+        + "service EmptyService {
     }
     ";
     let result = parse(&input).unwrap();
@@ -179,7 +202,8 @@ fn parse_empty_service() {
 
 #[test]
 fn parse_service() {
-    let input = min_file()  + "service GatewayService {
+    let input = min_file()
+        + "service GatewayService {
       rpc GetGreeting(GetGreetingReq) returns (GetGreetingRsp);
     }
     ";
@@ -190,15 +214,22 @@ fn parse_service() {
     assert_eq!(result.services[0].rpcs.len(), 1);
     assert_eq!(result.services[0].rpcs[0].name, "GetGreeting");
     assert_eq!(result.services[0].rpcs[0].request_type.idents.len(), 1);
-    assert_eq!(result.services[0].rpcs[0].request_type.idents[0], "GetGreetingReq");
+    assert_eq!(
+        result.services[0].rpcs[0].request_type.idents[0],
+        "GetGreetingReq"
+    );
 
     assert_eq!(result.services[0].rpcs[0].response_type.idents.len(), 1);
-    assert_eq!(result.services[0].rpcs[0].response_type.idents[0], "GetGreetingRsp");
+    assert_eq!(
+        result.services[0].rpcs[0].response_type.idents[0],
+        "GetGreetingRsp"
+    );
 }
 
 #[test]
 fn parse_service_with_curly_brace_termination() {
-    let input = min_file()  + "service GatewayService {
+    let input = min_file()
+        + "service GatewayService {
       rpc GetGreeting(GetGreetingReq) returns (GetGreetingRsp) {}
     }
     ";
@@ -209,15 +240,22 @@ fn parse_service_with_curly_brace_termination() {
     assert_eq!(result.services[0].rpcs.len(), 1);
     assert_eq!(result.services[0].rpcs[0].name, "GetGreeting");
     assert_eq!(result.services[0].rpcs[0].request_type.idents.len(), 1);
-    assert_eq!(result.services[0].rpcs[0].request_type.idents[0], "GetGreetingReq");
+    assert_eq!(
+        result.services[0].rpcs[0].request_type.idents[0],
+        "GetGreetingReq"
+    );
 
     assert_eq!(result.services[0].rpcs[0].response_type.idents.len(), 1);
-    assert_eq!(result.services[0].rpcs[0].response_type.idents[0], "GetGreetingRsp");
+    assert_eq!(
+        result.services[0].rpcs[0].response_type.idents[0],
+        "GetGreetingRsp"
+    );
 }
 
 #[test]
 fn parse_service_with_3_rpcs() {
-    let input = min_file()  + "service ServiceWith3 {
+    let input = min_file()
+        + "service ServiceWith3 {
       rpc Rpc1(Req1) returns (Rsp1);
       rpc Rpc2(Req2) returns (Rsp2);
       rpc Rpc3(Req3) returns (Rsp3);
@@ -250,7 +288,7 @@ fn parse_service_with_3_rpcs() {
 
 #[test]
 fn parse_empty_message() {
-    let input = min_file()  + "message EmptyMessage {}";
+    let input = min_file() + "message EmptyMessage {}";
 
     let result = parse(&input).unwrap();
     assert_eq!(result.messages.len(), 1);
@@ -259,7 +297,8 @@ fn parse_empty_message() {
 
 #[test]
 fn parse_message_with_fields() {
-    let input = min_file()  + "message MessageWithField {
+    let input = min_file()
+        + "message MessageWithField {
         string foo = 1;
         repeated string bar = 2;
         double baz = 3;
@@ -294,7 +333,8 @@ fn parse_message_with_fields() {
 
 #[test]
 fn parse_message_with_keyword_identifier() {
-    let input = min_file()  + "message HelloReply {
+    let input = min_file()
+        + "message HelloReply {
       string message = 1;
     }";
 
@@ -328,7 +368,8 @@ fn parse_simple_proto_file() {
 
     message GetGreetingRsp {
       string Greeting = 1;
-  }"#.to_string();
+  }"#
+    .to_string();
 
     let result = parse(&input).unwrap();
 
@@ -354,7 +395,6 @@ fn should_error_if_file_does_not_exist() {
 fn should_parse_helloworld_example() {
     parse_from_file(Path::new("tests/testdata/helloworld.proto")).unwrap();
 }
-
 
 // helper methods
 
